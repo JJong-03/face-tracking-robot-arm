@@ -1,0 +1,17 @@
+# AI 작업 지침 (로컬 전용)
+CLAUDE.md
+AGENTS.md
+
+# 내부 참고 문서 (면접 준비, 메타 정보 등)
+archive/internal_docs/
+
+# Claude Code
+.claude/
+.codex
+
+# 작업 초안 / 예시 파일
+output/
+example.md
+
+# GitHub 업로드 제한 초과 파일
+assets/presentations/final/20251117_2ndSem_12week_presentation_final-presentation-system-overview.pptx
