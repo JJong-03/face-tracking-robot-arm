@@ -3,7 +3,7 @@ import numpy as np
 import threading
 import queue
 import serial
-import serial.tools.list_ports  # ⭐ 포트 확인용
+import serial.tools.list_ports  # 포트 확인용
 import os
 import re
 import time
@@ -47,7 +47,7 @@ CAP_WIDTH, CAP_HEIGHT, CAP_FPS = 1920, 1080, 40
 #CAP_WIDTH, CAP_HEIGHT, CAP_FPS = 640, 480, 60
 RECORD_USE_STAB = True
 
-# ⭐ 디버깅 설정
+# 디버깅 설정
 DEBUG_MODE = True  # False로 변경하면 디버깅 끄기
 DEBUG_DETAIL = False  # True로 변경하면 상세 디버깅 (매 프레임)
 DEBUG_SERIAL_TEST = False  # True로 변경하면 시리얼 테스트 모드
@@ -55,7 +55,7 @@ DEBUG_SERIAL_TEST = False  # True로 변경하면 시리얼 테스트 모드
 SHOW_OVERLAY = False
 
 # 시리얼 포트 설정 (사용자 환경에 맞게 수정)
-SERIAL_PORT = 'COM5'  # ⭐ 여기를 수정하세요!
+SERIAL_PORT = 'COM5'  # 여기를 수정하세요!
 SERIAL_BAUD = 115200
 
 # 시리얼 통신 진단
@@ -125,7 +125,7 @@ debug_counters = {
     "motor_frozen": 0
 }
 
-# ⭐ 추적 테스트 변수 (평가지표 3용)
+# 추적 테스트 변수 (평가지표 3용)
 test_mode_active = False
 test_phase = "idle"
 test_start_time = 0
@@ -133,7 +133,7 @@ test_stop_start_time = 0
 test_coordinates = []
 test_reference_point = None
 
-# ⭐ 평가지표 2 테스트 변수
+# 평가지표 2 테스트 변수
 test2_mode_active = False
 test2_phase = "idle"
 test2_start_time = 0
@@ -144,7 +144,7 @@ test2_prev_cx = None  # 이전 프레임 x 좌표 (테스트용)
 test2_prev_cy = None  # 이전 프레임 y 좌표 (테스트용)
 test2_countdown_printed = {}
 
-# ⭐ 평가지표 1 변수 (dh1_code.py 방식)
+# 평가지표 1 변수 (dh1_code.py 방식)
 from collections import deque
 FACE_PRESENCE_WINDOW_SEC = 0.5
 FACE_PRESENCE_Q = deque()
@@ -202,13 +202,13 @@ def debug_log(message, level="INFO", force=False):
     timestamp = time.strftime("%H:%M:%S")
     
     if level == "ERROR":
-        prefix = "❌ [ERROR]"
+        prefix = "[ERROR]"
     elif level == "WARN":
-        prefix = "⚠️  [WARN]"
+        prefix = "[WARN]"
     elif level == "DETAIL":
-        prefix = "🔍 [DETAIL]"
+        prefix = "[DETAIL]"
     else:
-        prefix = "ℹ️  [INFO]"
+        prefix = "[INFO]"
     
     print(f"{timestamp} {prefix} {message}")
 
@@ -430,7 +430,7 @@ def serial_worker(q, port, baud):
         time.sleep(2)
         debug_log(f"시리얼 연결 완료: {port}", "INFO", force=True)
         
-        # ⭐ 연결 테스트
+        # 연결 테스트
         test_msg = "0,0,0,0,0,0,100\n"
         ser.write(test_msg.encode('utf-8'))
         debug_log(f"초기 테스트 신호 전송: {test_msg.strip()}", "INFO", force=True)
@@ -446,7 +446,7 @@ def serial_worker(q, port, baud):
     except serial.SerialException as e:
         debug_log(f"시리얼 연결 실패: {e}", "ERROR", force=True)
         debug_log(f"", "ERROR", force=True)
-        debug_log(f"🔧 문제 해결 방법:", "ERROR", force=True)
+        debug_log(f"문제 해결 방법:", "ERROR", force=True)
         debug_log(f"  1. 장치 관리자에서 COM 포트 확인", "ERROR", force=True)
         debug_log(f"  2. 아두이노 USB 재연결", "ERROR", force=True)
         debug_log(f"  3. 아두이노 IDE 시리얼 모니터 닫기", "ERROR", force=True)
@@ -458,11 +458,11 @@ def serial_worker(q, port, baud):
         serial_health["connection_lost"] = True
         return
     
-    # ⭐ 시리얼 테스트 모드
+    # 시리얼 테스트 모드
     if DEBUG_SERIAL_TEST:
         debug_log("", "INFO", force=True)
         debug_log("=" * 70, "INFO", force=True)
-        debug_log("🧪 시리얼 테스트 모드 시작", "INFO", force=True)
+        debug_log("시리얼 테스트 모드 시작", "INFO", force=True)
         debug_log("5초마다 테스트 신호를 전송합니다.", "INFO", force=True)
         debug_log("아두이노 시리얼 모니터를 열어 데이터를 확인하세요!", "INFO", force=True)
         debug_log("=" * 70, "INFO", force=True)
@@ -480,18 +480,18 @@ def serial_worker(q, port, baud):
                 
                 try:
                     ser.write(test_msg.encode('utf-8'))
-                    debug_log(f"  ✅ 전송 성공", "INFO", force=True)
+                    debug_log(f"  전송 성공", "INFO", force=True)
                     
                     # 아두이노 응답 확인
                     time.sleep(0.1)
                     if ser.in_waiting > 0:
                         response = ser.readline().decode('utf-8', errors='ignore').strip()
-                        debug_log(f"  📩 아두이노 응답: {response}", "INFO", force=True)
+                        debug_log(f"  아두이노 응답: {response}", "INFO", force=True)
                     else:
-                        debug_log(f"  📭 아두이노 응답 없음", "WARN", force=True)
+                        debug_log(f"  아두이노 응답 없음", "WARN", force=True)
                         
                 except Exception as e:
-                    debug_log(f"  ❌ 전송 실패: {e}", "ERROR", force=True)
+                    debug_log(f"  전송 실패: {e}", "ERROR", force=True)
                 
                 time.sleep(5)
                 
@@ -532,7 +532,7 @@ def serial_worker(q, port, baud):
                 vals = [motor_cmds.get(f"motor_{i}", 0) for i in range(1, 8)]
                 message = ','.join(map(str, vals)) + '\n'
                 
-                # ⭐ 전송 시도
+                # 전송 시도
                 ser.write(message.encode('utf-8'))
                 serial_health["total_sent"] += 1
                 serial_health["last_success_time"] = time.time()
@@ -541,15 +541,15 @@ def serial_worker(q, port, baud):
                 
                 debug_log(f"시리얼 전송 #{debug_counters['serial_sent']}: {message.strip()}", "DETAIL")
                 
-                # ⭐ 주기적인 통신 상태 체크 (100번마다)
+                # 주기적인 통신 상태 체크 (100번마다)
                 if debug_counters["serial_sent"] % 100 == 0:
                     elapsed = time.time() - serial_health["last_success_time"]
                     error_rate = (serial_health["total_errors"] / serial_health["total_sent"] * 100) if serial_health["total_sent"] > 0 else 0
                     
                     if error_rate > 5:
-                        debug_log(f"⚠️  시리얼 오류율 높음: {error_rate:.1f}% ({serial_health['total_errors']}/{serial_health['total_sent']})", "WARN")
+                        debug_log(f"시리얼 오류율 높음: {error_rate:.1f}% ({serial_health['total_errors']}/{serial_health['total_sent']})", "WARN")
                     else:
-                        debug_log(f"✅ 시리얼 통신 양호: 오류율 {error_rate:.1f}%", "INFO")
+                        debug_log(f"시리얼 통신 양호: 오류율 {error_rate:.1f}%", "INFO")
                 
                 # delay 대기 (move_ready 플래그)
                 delay_ms = motor_cmds.get("motor_7", 50)
@@ -564,18 +564,18 @@ def serial_worker(q, port, baud):
                 
                 debug_log(f"시리얼 쓰기 오류 #{debug_counters['serial_error']}: {e}", "ERROR", force=True)
                 
-                # ⭐ 연속 오류 감지
+                # 연속 오류 감지
                 if serial_health["consecutive_errors"] >= 5:
                     debug_log(f"", "ERROR", force=True)
-                    debug_log(f"❌ 심각: 연속 {serial_health['consecutive_errors']}회 오류!", "ERROR", force=True)
+                    debug_log(f"심각: 연속 {serial_health['consecutive_errors']}회 오류!", "ERROR", force=True)
                     debug_log(f"", "ERROR", force=True)
-                    debug_log(f"🔧 가능한 원인:", "ERROR", force=True)
+                    debug_log(f"가능한 원인:", "ERROR", force=True)
                     debug_log(f"  1. USB 케이블 불량 또는 연결 불안정", "ERROR", force=True)
                     debug_log(f"  2. 아두이노 전원 부족", "ERROR", force=True)
                     debug_log(f"  3. 아두이노 처리 속도 느림 (버퍼 오버플로우)", "ERROR", force=True)
                     debug_log(f"  4. 아두이노 코드에서 Serial.read() 안 함", "ERROR", force=True)
                     debug_log(f"", "ERROR", force=True)
-                    debug_log(f"💡 해결 시도:", "ERROR", force=True)
+                    debug_log(f"해결 시도:", "ERROR", force=True)
                     debug_log(f"  - USB 재연결", "ERROR", force=True)
                     debug_log(f"  - 아두이노 리셋", "ERROR", force=True)
                     debug_log(f"  - delay 값 증가 (45 → 100)", "ERROR", force=True)
@@ -599,12 +599,12 @@ def serial_worker(q, port, baud):
             error_rate = (serial_health["total_errors"] / serial_health["total_sent"] * 100)
             if error_rate > 10:
                 debug_log(f"", "WARN", force=True)
-                debug_log(f"⚠️  시리얼 통신 품질 나쁨: 오류율 {error_rate:.1f}%", "WARN", force=True)
+                debug_log(f"시리얼 통신 품질 나쁨: 오류율 {error_rate:.1f}%", "WARN", force=True)
                 debug_log(f"   하드웨어 연결 상태를 확인하세요!", "WARN", force=True)
             elif error_rate > 0:
-                debug_log(f"✅ 시리얼 통신 정상 종료: 오류율 {error_rate:.1f}%", "INFO", force=True)
+                debug_log(f"시리얼 통신 정상 종료: 오류율 {error_rate:.1f}%", "INFO", force=True)
             else:
-                debug_log(f"✅ 시리얼 통신 완벽: 오류 없음!", "INFO", force=True)
+                debug_log(f"시리얼 통신 완벽: 오류 없음!", "INFO", force=True)
 
 # ============================================================
 # 얼굴 DNN
@@ -681,13 +681,13 @@ def main():
     global tracking_test_mode, tracking_enabled, test_duration
 
     print("\n" + "=" * 70)
-    print("🎥 얼굴 추적 로봇팔 제어 시스템 (방법 A)")
+    print("얼굴 추적 로봇팔 제어 시스템 (방법 A)")
     print("=" * 70)
-    print(f"디버깅 모드: {'🟢 ON' if DEBUG_MODE else '🔴 OFF'}")
+    print(f"디버깅 모드: {'ON' if DEBUG_MODE else 'OFF'}")
     if DEBUG_MODE:
-        print(f"상세 디버깅: {'🟢 ON' if DEBUG_DETAIL else '🔴 OFF'}")
+        print(f"상세 디버깅: {'ON' if DEBUG_DETAIL else 'OFF'}")
     if DEBUG_SERIAL_TEST:
-        print(f"시리얼 테스트 모드: 🟢 ON")
+        print(f"시리얼 테스트 모드: ON")
         print("  → 5초마다 테스트 신호를 전송합니다.")
         print("  → 아두이노 시리얼 모니터를 열어 확인하세요!")
     print("=" * 70)
@@ -702,7 +702,7 @@ def main():
     print("=" * 70)
     print()
     
-    # ⭐ 시리얼 테스트 모드일 때는 카메라 없이 실행
+    # 시리얼 테스트 모드일 때는 카메라 없이 실행
     if DEBUG_SERIAL_TEST:
         debug_log("시리얼 테스트 전용 모드 시작", "INFO", force=True)
         q = queue.Queue()
@@ -722,7 +722,7 @@ def main():
     threading.Thread(target=serial_worker, args=(q, SERIAL_PORT, SERIAL_BAUD), daemon=True).start()
     cap_thread = CaptureThread()
 
-    # ⭐ 평가지표 1 테스트 변수
+    # 평가지표 1 테스트 변수
     test1_vars = {
         "test_start_time": None,
         "countdown_printed": {},
@@ -732,15 +732,15 @@ def main():
         "last_printed_time": -1.0
     }
 
-    # ⭐ 평가지표 3 테스트 변수
+    # 평가지표 3 테스트 변수
     test3_countdown_printed = {}
 
     print("\n" + "=" * 70)
-    print("🧪 추적 성능 테스트")
+    print("추적 성능 테스트")
     print("=" * 70)
-    print("📌 'i' 키: 평가지표 1 (얼굴 검출 비율 테스트)")
-    print("📌 'p' 키: 평가지표 2 (이동량 안정성 테스트)")
-    print("📌 'o' 키: 평가지표 3 (원 내부 비율 테스트)")
+    print("'i' 키: 평가지표 1 (얼굴 검출 비율 테스트)")
+    print("'p' 키: 평가지표 2 (이동량 안정성 테스트)")
+    print("'o' 키: 평가지표 3 (원 내부 비율 테스트)")
     print("=" * 70)
     print()
 
@@ -816,7 +816,7 @@ def main():
             now = time.time()
             debug_counters["frame_count"] += 1
 
-            # ⭐⭐⭐ 평가지표 1 카운트다운 로직 (dh1_code.py 방식) ⭐⭐⭐
+            # 평가지표 1 카운트다운 로직 (dh1_code.py 방식)
             if tracking_test_mode and test1_vars["test_start_time"] is not None:
                 elapsed = now - test1_vars["test_start_time"]
                 countdown_printed = test1_vars["countdown_printed"]
@@ -826,31 +826,31 @@ def main():
                 last_printed_time = test1_vars["last_printed_time"]
 
                 if not countdown_printed.get("wait2") and elapsed >= 0:
-                    print("⏳ 2초 대기 중...")
+                    print("2초 대기 중...")
                     countdown_printed["wait2"] = True
 
                 if not countdown_printed.get("wait1") and elapsed >= 1:
-                    print("⏳ 1초 대기 중...")
+                    print("1초 대기 중...")
                     countdown_printed["wait1"] = True
 
                 if not countdown_printed.get("start") and elapsed >= 2:
-                    print("🔔 카운터 시작")
+                    print("카운터 시작")
                     countdown_printed["start"] = True
 
                 if not countdown_printed.get("3sec") and elapsed >= 3:
-                    print("⏱️  3초")
+                    print("3초")
                     countdown_printed["3sec"] = True
 
                 if not countdown_printed.get("2sec") and elapsed >= 4:
-                    print("⏱️  2초")
+                    print("2초")
                     countdown_printed["2sec"] = True
 
                 if not countdown_printed.get("1sec") and elapsed >= 5:
-                    print("⏱️  1초")
+                    print("1초")
                     countdown_printed["1sec"] = True
 
                 if not countdown_printed.get("move") and elapsed >= 6:
-                    print(f"\n🚀 움직임 시작! 지금 좌우로 움직이세요! (테스트 시간: {test_duration}초)\n")
+                    print(f"\n움직임 시작! 지금 좌우로 움직이세요! (테스트 시간: {test_duration}초)\n")
                     test1_vars["movement_start_time"] = now
                     movement_start_time = now
                     tracking_enabled = True
@@ -865,59 +865,59 @@ def main():
 
                     current_second = int(elapsed_move)
                     if current_second > test1_vars["last_move_second"] and current_second < int(test_duration):
-                        print(f"⏱️  움직임 경과: {current_second}초")
+                        print(f"움직임 경과: {current_second}초")
                         test1_vars["last_move_second"] = current_second
 
                     if elapsed_move >= test_duration and test1_vars["last_printed_time"] < test_duration:
-                        print(f"⏱️  움직임 경과: {test_duration}초")
+                        print(f"움직임 경과: {test_duration}초")
                         test1_vars["last_printed_time"] = test_duration
 
                 # 얼굴 검출 체크 (항상 2초 후)
                 if movement_start_time and not face_detection_checked and (now - movement_start_time) >= DETECTION_TIME:
                     if (now - movement_start_time) >= (DETECTION_TIME + 0.2):
                         test1_vars["face_detection_checked"] = True
-                        print(f"⏱️  {DETECTION_TIME + 0.2:.1f}초 경과 - 추적 결과 확인 중...\n")
+                        print(f"{DETECTION_TIME + 0.2:.1f}초 경과 - 추적 결과 확인 중...\n")
 
                         ratio = recent_face_ratio()
                         face_detected = (ratio >= 60.0)
 
                         print("=" * 70)
-                        print("📊 평가지표 1 - 추적 테스트 결과")
+                        print("평가지표 1 - 추적 테스트 결과")
                         print("=" * 70)
-                        print(f"⏱️  움직임 시간: {test_duration}초")
-                        print(f"⏱️  검출 체크 시간: {DETECTION_TIME}초")
-                        print(f"🎯 얼굴 검출 비율: {ratio:.1f}%")
+                        print(f"움직임 시간: {test_duration}초")
+                        print(f"검출 체크 시간: {DETECTION_TIME}초")
+                        print(f"얼굴 검출 비율: {ratio:.1f}%")
 
                         if face_detected:
-                            print("✅ 성공: 로봇팔이 사용자를 성공적으로 추적했습니다!")
+                            print("성공: 로봇팔이 사용자를 성공적으로 추적했습니다!")
                             print(f"   → {DETECTION_TIME}초 후에도 얼굴이 카메라 영역 내에 유지되었습니다.")
                         else:
-                            print("❌ 실패: 로봇팔이 사용자를 놓쳤습니다!")
+                            print("실패: 로봇팔이 사용자를 놓쳤습니다!")
                             print(f"   → {DETECTION_TIME}초 후 얼굴이 카메라 영역을 벗어났습니다.")
                         print("=" * 70)
-                        print("🔄 정상 추적 모드로 전환합니다...")
-                        print("💡 'i' 키를 눌러 다시 테스트할 수 있습니다.\n")
+                        print("정상 추적 모드로 전환합니다...")
+                        print("'i' 키를 눌러 다시 테스트할 수 있습니다.\n")
                         tracking_test_mode = False
 
-            # ⭐⭐⭐ 평가지표 2 카운트다운 로직 (이동량 안정성) ⭐⭐⭐
+            # 평가지표 2 카운트다운 로직 (이동량 안정성)
             if test2_mode_active:
                 elapsed_test2 = now - test2_start_time
 
                 if test2_phase == "waiting":
                     if not test2_countdown_printed.get("3sec") and elapsed_test2 >= 1:
-                        print("⏱️  3초")
+                        print("3초")
                         test2_countdown_printed["3sec"] = True
 
                     if not test2_countdown_printed.get("2sec") and elapsed_test2 >= 2:
-                        print("⏱️  2초")
+                        print("2초")
                         test2_countdown_printed["2sec"] = True
 
                     if not test2_countdown_printed.get("1sec") and elapsed_test2 >= 3:
-                        print("⏱️  1초")
+                        print("1초")
                         test2_countdown_printed["1sec"] = True
 
                     if not test2_countdown_printed.get("move_start") and elapsed_test2 >= 4:
-                        print("\n🚀 사용자 움직임 시작! 지금 좌우 또는 상하로 움직이세요! (3초)\n")
+                        print("\n사용자 움직임 시작! 지금 좌우 또는 상하로 움직이세요! (3초)\n")
                         test2_phase = "moving"
                         test2_move_start_time = now
                         test2_countdown_printed["move_start"] = True
@@ -926,15 +926,15 @@ def main():
                     move_elapsed = now - test2_move_start_time
 
                     if not test2_countdown_printed.get("moving_2sec") and move_elapsed >= 1:
-                        print("⏱️  2초")
+                        print("2초")
                         test2_countdown_printed["moving_2sec"] = True
 
                     if not test2_countdown_printed.get("moving_1sec") and move_elapsed >= 2:
-                        print("⏱️  1초")
+                        print("1초")
                         test2_countdown_printed["moving_1sec"] = True
 
                     if move_elapsed < 3.0:  # 3초간 이동량 수집
-                        # ⭐ 화면에 표시되는 좌표(gcx, gcy)를 사용하여 측정
+                        # 화면에 표시되는 좌표(gcx, gcy)를 사용하여 측정
                         if face_found:
                             # 좌표 기록
                             test2_coordinates.append((gcx, gcy))
@@ -963,29 +963,29 @@ def main():
                             avg_dist = sum(test2_distances) / len(test2_distances)
 
                             print("=" * 70)
-                            print("📊 평가지표 2 - 이동량 안정성 테스트 결과")
+                            print("평가지표 2 - 이동량 안정성 테스트 결과")
                             print("=" * 70)
-                            print(f"📍 수집된 프레임 개수: {total_count}개")
-                            print(f"📏 임계값: {DT_THRESH_PX}px")
-                            print(f"📐 이동량 통계: 최소={min_dist:.2f}px, 평균={avg_dist:.2f}px, 최대={max_dist:.2f}px")
-                            print(f"✅ 임계값 이하 프레임: {stable_count}개")
-                            print(f"❌ 임계값 초과 프레임: {total_count - stable_count}개")
-                            print(f"📈 안정성 비율: {ratio:.2f}%")
+                            print(f"수집된 프레임 개수: {total_count}개")
+                            print(f"임계값: {DT_THRESH_PX}px")
+                            print(f"이동량 통계: 최소={min_dist:.2f}px, 평균={avg_dist:.2f}px, 최대={max_dist:.2f}px")
+                            print(f"임계값 이하 프레임: {stable_count}개")
+                            print(f"임계값 초과 프레임: {total_count - stable_count}개")
+                            print(f"안정성 비율: {ratio:.2f}%")
                             print("=" * 70)
 
-                            # ⭐ 목표 80% 달성 여부
+                            # 목표 80% 달성 여부
                             if ratio >= 80:
-                                print("✅ 목표 달성! 매우 안정적인 추적!")
+                                print("목표 달성! 매우 안정적인 추적!")
                             elif ratio >= 70:
-                                print("🟢 양호: 목표에 근접한 추적 (70% 이상)")
+                                print("양호: 목표에 근접한 추적 (70% 이상)")
                             elif ratio >= 60:
-                                print("🟡 보통: 추적 성능 개선 필요 (60~70%)")
+                                print("보통: 추적 성능 개선 필요 (60~70%)")
                             else:
-                                print("🔴 불량: 추적 안정성이 낮음 (60% 미만)")
+                                print("불량: 추적 안정성이 낮음 (60% 미만)")
 
-                            # ⭐ 수집된 좌표 출력
+                            # 수집된 좌표 출력
                             print("\n" + "=" * 70)
-                            print("📍 수집된 좌표 목록 (gcx, gcy)")
+                            print("수집된 좌표 목록 (gcx, gcy)")
                             print("=" * 70)
                             for idx, (cx, cy) in enumerate(test2_coordinates, 1):
                                 # 이동량도 함께 출력 (첫 번째 좌표는 이동량 없음)
@@ -994,49 +994,49 @@ def main():
                                 else:
                                     # 실제 측정된 이동량 사용 (test2_distances는 좌표보다 1개 적음)
                                     dist = test2_distances[idx-2]  # idx-2: 좌표 인덱스와 맞춤
-                                    status = "✅" if dist <= DT_THRESH_PX else "❌"
+                                    status = "OK" if dist <= DT_THRESH_PX else "NG"
                                     print(f"{idx:3d}. ({cx:4.0f}, {cy:4.0f}) - 이동량: {dist:6.2f}px {status}")
                             print("=" * 70)
 
                             print("\n정상 모드로 전환합니다...")
-                            print("💡 'p' 키를 눌러 다시 테스트할 수 있습니다.\n")
+                            print("'p' 키를 눌러 다시 테스트할 수 있습니다.\n")
                         else:
-                            print("⚠️  테스트 실패: 이동량을 수집하지 못했습니다.")
+                            print("테스트 실패: 이동량을 수집하지 못했습니다.")
                             print("   얼굴이 검출되지 않았거나 추적이 실패했습니다.\n")
 
-            # ⭐⭐⭐ 평가지표 3 카운트다운 로직 (원 내부 비율) ⭐⭐⭐
+            # 평가지표 3 카운트다운 로직 (원 내부 비율)
             if test_mode_active:
                 elapsed_test = now - test_start_time
 
                 if test_phase == "waiting":
                     if not test3_countdown_printed.get("3sec") and elapsed_test >= 1:
-                        print("⏱️  3초")
+                        print("3초")
                         test3_countdown_printed["3sec"] = True
 
                     if not test3_countdown_printed.get("2sec") and elapsed_test >= 2:
-                        print("⏱️  2초")
+                        print("2초")
                         test3_countdown_printed["2sec"] = True
 
                     if not test3_countdown_printed.get("1sec") and elapsed_test >= 3:
-                        print("⏱️  1초")
+                        print("1초")
                         test3_countdown_printed["1sec"] = True
 
                     if not test3_countdown_printed.get("move_start") and elapsed_test >= 4:
-                        print("\n🚀 사용자 움직임 시작! 지금 좌우 또는 상하로 움직이세요! (3초)\n")
+                        print("\n사용자 움직임 시작! 지금 좌우 또는 상하로 움직이세요! (3초)\n")
                         test_phase = "moving"
                         test3_countdown_printed["move_start"] = True
 
                 if test_phase == "moving":
                     if not test3_countdown_printed.get("moving_2sec") and elapsed_test >= 5:
-                        print("⏱️  2초")
+                        print("2초")
                         test3_countdown_printed["moving_2sec"] = True
 
                     if not test3_countdown_printed.get("moving_1sec") and elapsed_test >= 6:
-                        print("⏱️  1초")
+                        print("1초")
                         test3_countdown_printed["moving_1sec"] = True
 
                     if not test3_countdown_printed.get("stop_start") and elapsed_test >= 7:
-                        print("\n⏸️  움직임 멈춤! 3초간 정지하세요!\n")
+                        print("\n움직임 멈춤! 3초간 정지하세요!\n")
                         test_phase = "stopping"
                         test_stop_start_time = now
                         test_coordinates = []
@@ -1047,20 +1047,20 @@ def main():
                     stop_elapsed = now - test_stop_start_time
 
                     if not test3_countdown_printed.get("stop_2sec") and stop_elapsed >= 1:
-                        print("⏱️  2초")
+                        print("2초")
                         test3_countdown_printed["stop_2sec"] = True
 
                     if not test3_countdown_printed.get("stop_1sec") and stop_elapsed >= 2:
-                        print("⏱️  1초")
+                        print("1초")
                         test3_countdown_printed["stop_1sec"] = True
 
                     if stop_elapsed < 3.0:  # 3초간 수집
                         if face_found:
-                            # ⭐ 화면에 표시되는 좌표(gcx, gcy) 사용
+                            # 화면에 표시되는 좌표(gcx, gcy) 사용
                             test_coordinates.append((gcx, gcy))
 
                             if test_reference_point is None:
-                                # ✅ 수정: 크롭 후 프레임 중심 사용
+                                # 수정: 크롭 후 프레임 중심 사용
                                 test_reference_point = (display_w // 2, display_h // 2)
                                 debug_log(f"기준점 설정 (화면 중심): {test_reference_point}", "INFO", force=True)
 
@@ -1069,9 +1069,9 @@ def main():
                         test_phase = "done"
 
                         if test_reference_point and len(test_coordinates) > 0:
-                            # ✅ 수정: 크롭 후 프레임 가로 기준으로 반지름 설정
+                            # 수정: 크롭 후 프레임 가로 기준으로 반지름 설정
                             TEST_CIRCLE_RADIUS = int(display_w * CIRCLE_RADIUS_RATIO)
-                            print(f"📏 원의 반지름: {TEST_CIRCLE_RADIUS}px (화면 가로의 {CIRCLE_RADIUS_RATIO*100}%, 지름 {TEST_CIRCLE_RADIUS*2}px)")
+                            print(f"원의 반지름: {TEST_CIRCLE_RADIUS}px (화면 가로의 {CIRCLE_RADIUS_RATIO*100}%, 지름 {TEST_CIRCLE_RADIUS*2}px)")
 
                             inside_count = 0
                             total_count = len(test_coordinates)
@@ -1085,30 +1085,30 @@ def main():
                             ratio = (inside_count / total_count * 100) if total_count > 0 else 0
 
                             print("=" * 70)
-                            print("📊 평가지표 3 - 추적 안정성 테스트 결과")
+                            print("평가지표 3 - 추적 안정성 테스트 결과")
                             print("=" * 70)
-                            print(f"🎯 기준점: {test_reference_point}")
-                            print(f"📏 원의 반지름: {TEST_CIRCLE_RADIUS}px (화면 가로의 {CIRCLE_RADIUS_RATIO*100}%, 지름 {TEST_CIRCLE_RADIUS*2}px)")
-                            print(f"📍 수집된 좌표 개수: {total_count}개")
-                            print(f"✅ 원 내부 좌표: {inside_count}개")
-                            print(f"❌ 원 외부 좌표: {total_count - inside_count}개")
-                            print(f"📈 원 내부 비율: {ratio:.2f}%")
+                            print(f"기준점: {test_reference_point}")
+                            print(f"원의 반지름: {TEST_CIRCLE_RADIUS}px (화면 가로의 {CIRCLE_RADIUS_RATIO*100}%, 지름 {TEST_CIRCLE_RADIUS*2}px)")
+                            print(f"수집된 좌표 개수: {total_count}개")
+                            print(f"원 내부 좌표: {inside_count}개")
+                            print(f"원 외부 좌표: {total_count - inside_count}개")
+                            print(f"원 내부 비율: {ratio:.2f}%")
                             print("=" * 70)
 
-                            # ⭐ 목표 80% 달성 여부
+                            # 목표 80% 달성 여부
                             if ratio >= 80:
-                                print("✅ 목표 달성! 매우 안정적인 추적!")
+                                print("목표 달성! 매우 안정적인 추적!")
                             elif ratio >= 70:
-                                print("🟢 양호: 목표에 근접한 추적 (70% 이상)")
+                                print("양호: 목표에 근접한 추적 (70% 이상)")
                             elif ratio >= 60:
-                                print("🟡 보통: 추적 성능 개선 필요 (60~70%)")
+                                print("보통: 추적 성능 개선 필요 (60~70%)")
                             else:
-                                print("🔴 불량: 추적 안정성이 낮음 (60% 미만)")
+                                print("불량: 추적 안정성이 낮음 (60% 미만)")
 
                             print("\n정상 모드로 전환합니다...")
-                            print("💡 'o' 키를 눌러 다시 테스트할 수 있습니다.\n")
+                            print("'o' 키를 눌러 다시 테스트할 수 있습니다.\n")
                         else:
-                            print("⚠️  테스트 실패: 좌표를 수집하지 못했습니다.")
+                            print("테스트 실패: 좌표를 수집하지 못했습니다.")
                             print("   얼굴이 검출되지 않았거나 추적이 실패했습니다.\n")
 
             sum_time_per_sec += (now-pre_frame_time)
@@ -1146,7 +1146,7 @@ def main():
 
             face_found = len(face_boxes) > 0
 
-            # ⭐ 평가지표 1을 위한 얼굴 검출 기록
+            # 평가지표 1을 위한 얼굴 검출 기록
             update_face_presence(now, face_found)
 
             # 얼굴 상태 변화 로깅
@@ -1190,7 +1190,7 @@ def main():
                 use_cy += int(kf.statePost[3,0] * LEAD_FACE_SEC)
             
             ##-----------------------------------------------------------------
-            ## ⚡ 로봇팔 제어 (평가지표 1에서는 tracking_enabled 조건 추가)
+            ## 로봇팔 제어 (평가지표 1에서는 tracking_enabled 조건 추가)
             ##-----------------------------------------------------------------
             # 평가지표 1 모드에서는 tracking_enabled가 True일 때만 추적
             # 평가지표 3 모드나 일반 모드에서는 항상 추적
@@ -1307,7 +1307,7 @@ def main():
             good_prev = good_prev[mask]
             good_next = good_next[mask]
 
-            # --- 🔧 shape 보정 추가 ---
+            # --- shape 보정 추가 ---
             pts_old = np.squeeze(good_prev)
             pts_new = np.squeeze(good_next)
 
@@ -1417,7 +1417,7 @@ def main():
                     cv2.rectangle(display, (int(gx1), int(gy1)), (int(gx2), int(gy2)), (0,200,0), 2)
                     cv2.circle(display, (int(gcx), int(gcy)), 3, (0, 0, 255), -1)
 
-                # ⭐⭐⭐ 테스트 모드 중일 때 원 표시
+                # 테스트 모드 중일 때 원 표시
                 if test_phase == "stopping" and test_reference_point:
                     # 화면 가로 기준 비율로 원 그리기
                     TEST_CIRCLE_RADIUS = int(frame_w * CIRCLE_RADIUS_RATIO)
@@ -1492,7 +1492,7 @@ def main():
                 #cv2.putText(display, f"FPS:{frame_per_sec} | Q:{q.qsize()}",
                             #(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 1)
 
-            # ⭐⭐⭐ 평가지표 2 테스트 진행 상태 표시
+            # 평가지표 2 테스트 진행 상태 표시
             if SHOW_OVERLAY and test2_mode_active:
                 elapsed_test2 = now - test2_start_time
                 if test2_phase == "waiting":
@@ -1505,7 +1505,7 @@ def main():
                     cv2.putText(display, test_text, (display.shape[1]//2 - 300, 50),
                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
-            # ⭐⭐⭐ 평가지표 3 테스트 진행 상태 표시
+            # 평가지표 3 테스트 진행 상태 표시
             if SHOW_OVERLAY and test_mode_active:
                 elapsed_test = now - test_start_time
                 if test_phase == "waiting":
@@ -1523,7 +1523,7 @@ def main():
                     cv2.putText(display, test_text, (display.shape[1]//2 - 300, 50),
                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
 
-            # ⭐⭐⭐ 평가지표 1 테스트 진행 상태 표시
+            # 평가지표 1 테스트 진행 상태 표시
             if SHOW_OVERLAY and tracking_test_mode and test1_vars["movement_start_time"]:
                 elapsed_move = now - test1_vars["movement_start_time"]
                 test_text = f"[Test 1] 움직임: {elapsed_move:.1f}s / {test_duration}s (Check: {DETECTION_TIME}s)"
@@ -1542,7 +1542,7 @@ def main():
                     cv2.putText(display, f"[Test 1] {track_status}", (display.shape[1] - 200, 60),
                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, status_color, 2)
 
-            # ⭐ 대기 상태 표시
+            # 대기 상태 표시
             if SHOW_OVERLAY and (not tracking_test_mode and not test_mode_active):
                 cv2.putText(display, "Press 'i' (Test 1) or 'o' (Test 3)",
                            (display.shape[1] - 380, 30),
@@ -1603,7 +1603,7 @@ def main():
                 debug_log("종료 키 입력됨", "INFO", force=True)
                 break
 
-            # ⭐⭐⭐ 'i' 키: 평가지표 1 테스트 시작 ⭐⭐⭐
+            # 'i' 키: 평가지표 1 테스트 시작
             if key == ord('i'):
                 if not tracking_test_mode and not test_mode_active:
                     try:
@@ -1615,16 +1615,16 @@ def main():
                         else:
                             duration = float(user_input)
                             if duration <= 0 or duration > 2.0:
-                                print("⚠️  입력값은 0.1~2.0초 사이여야 합니다. 기본값 1.5초로 설정합니다.")
+                                print("입력값은 0.1~2.0초 사이여야 합니다. 기본값 1.5초로 설정합니다.")
                                 duration = 1.5
 
                         print("=" * 70)
-                        print(f"🧪 평가지표 1 - 추적 성능 테스트 시작")
+                        print(f"평가지표 1 - 추적 성능 테스트 시작")
                         print("=" * 70)
-                        print(f"⏱️  움직임 시간: {duration}초")
-                        print(f"⏱️  검출 체크: {DETECTION_TIME}초 후")
+                        print(f"움직임 시간: {duration}초")
+                        print(f"검출 체크: {DETECTION_TIME}초 후")
                         print("=" * 70)
-                        print("📌 테스트 절차:")
+                        print("테스트 절차:")
                         print("  1. 카메라 앞에 얼굴을 위치시켜 주세요")
                         print("  2. 카운트다운이 시작되면 준비하세요")
                         print("  3. '움직임 시작' 신호 후 좌우로 움직이세요")
@@ -1636,23 +1636,23 @@ def main():
                         debug_log(f"평가지표 1 테스트 시작 (움직임: {duration}초, 검출: {DETECTION_TIME}초)", "INFO", force=True)
 
                     except ValueError:
-                        print("⚠️  입력값이 유효하지 않습니다. 기본값 1.5초로 설정합니다.\n")
+                        print("입력값이 유효하지 않습니다. 기본값 1.5초로 설정합니다.\n")
                         duration = 1.5
                         test1_vars = reset_test_mode(duration)
                     except Exception as e:
-                        print(f"⚠️  오류 발생: {e}. 기본값 1.5초로 설정합니다.\n")
+                        print(f"오류 발생: {e}. 기본값 1.5초로 설정합니다.\n")
                         duration = 1.5
                         test1_vars = reset_test_mode(duration)
                 else:
-                    print("\n⚠️  테스트가 이미 진행 중입니다. 완료될 때까지 기다려주세요.\n")
+                    print("\n테스트가 이미 진행 중입니다. 완료될 때까지 기다려주세요.\n")
 
-            # ⭐⭐⭐ 'p' 키: 평가지표 2 테스트 시작 ⭐⭐⭐
+            # 'p' 키: 평가지표 2 테스트 시작
             if key == ord('p'):
                 if not test2_mode_active and not test_mode_active and not tracking_test_mode:
                     print("\n" + "=" * 70)
-                    print("🧪 평가지표 2 - 이동량 안정성 테스트 시작")
+                    print("평가지표 2 - 이동량 안정성 테스트 시작")
                     print("=" * 70)
-                    print("📌 테스트 절차:")
+                    print("테스트 절차:")
                     print("  1. 카운트다운 후 움직이세요 (3초)")
                     print("  2. 이동량이 임계값 이하인 비율을 측정합니다 (3초)")
                     print(f"  3. 목표: 안정성 비율 ≥ 80% (임계값: {DT_THRESH_PX}px)")
@@ -1670,15 +1670,15 @@ def main():
                     test2_prev_cy = None
                     debug_log("평가지표 2 테스트 시작", "INFO", force=True)
                 else:
-                    print("\n⚠️  테스트가 이미 진행 중입니다. 완료될 때까지 기다려주세요.\n")
+                    print("\n테스트가 이미 진행 중입니다. 완료될 때까지 기다려주세요.\n")
 
-            # ⭐⭐⭐ 'o' 키: 평가지표 3 테스트 시작 ⭐⭐⭐
+            # 'o' 키: 평가지표 3 테스트 시작
             if key == ord('o'):
                 if not test_mode_active and not tracking_test_mode and not test2_mode_active:
                     print("\n" + "=" * 70)
-                    print("🧪 평가지표 3 - 추적 안정성 테스트 시작")
+                    print("평가지표 3 - 추적 안정성 테스트 시작")
                     print("=" * 70)
-                    print("📌 테스트 절차:")
+                    print("테스트 절차:")
                     print("  1. 카운트다운 후 좌우 또는 상하로 움직이세요 (3초)")
                     print("  2. '움직임 멈춤' 신호 후 정지하세요 (3초)")
                     print("  3. 추적 안정성을 측정합니다")
@@ -1695,7 +1695,7 @@ def main():
                     test_reference_point = None
                     debug_log("평가지표 3 테스트 시작", "INFO", force=True)
                 else:
-                    print("\n⚠️  테스트가 이미 진행 중입니다. 완료될 때까지 기다려주세요.\n")
+                    print("\n테스트가 이미 진행 중입니다. 완료될 때까지 기다려주세요.\n")
 
             if key == ord('s') and not recording and not photo_shooting:
                 output_path = get_new_filename()
@@ -1765,10 +1765,10 @@ def main():
 
         # 지표 요약
         print("\n" + "=" * 70)
-        print("📊 성능 지표 최종 요약")
+        print("성능 지표 최종 요약")
         print("=" * 70)
         
-        print(f"\n🔧 시스템 통계:")
+        print(f"\n시스템 통계:")
         print(f"  총 프레임 처리: {debug_counters['frame_count']}")
         print(f"  얼굴 검출 성공: {debug_counters['face_detected']}회")
         print(f"  얼굴 손실: {debug_counters['face_lost']}회")
@@ -1779,73 +1779,73 @@ def main():
             print(f"  시리얼 오류율: {error_rate:.2f}%")
         print(f"  모터 Freeze: {debug_counters['motor_frozen']}회")
         
-        # ⭐ 시리얼 통신 진단
+        # 시리얼 통신 진단
         if serial_health['connection_lost']:
-            print(f"\n⚠️  시리얼 연결 문제 감지됨!")
+            print(f"\n시리얼 연결 문제 감지됨!")
             print(f"   - USB 연결 확인")
             print(f"   - 아두이노 상태 확인")
             print(f"   - Baud Rate 확인: {SERIAL_BAUD}")
         elif serial_health['total_sent'] == 0:
-            print(f"\n⚠️  시리얼 데이터 전송 없음!")
+            print(f"\n시리얼 데이터 전송 없음!")
             print(f"   - 얼굴이 검출되지 않았을 수 있음")
             print(f"   - 카메라 위치/조명 확인")
         elif serial_health['total_errors'] > 0:
             error_rate = (serial_health['total_errors'] / serial_health['total_sent'] * 100)
             if error_rate > 10:
-                print(f"\n⚠️  시리얼 오류율 높음: {error_rate:.1f}%")
+                print(f"\n시리얼 오류율 높음: {error_rate:.1f}%")
                 print(f"   - USB 케이블 교체 권장")
                 print(f"   - 아두이노 처리 속도 확인")
             else:
-                print(f"\n✅ 시리얼 통신: 정상 (오류율 {error_rate:.1f}%)")
+                print(f"\n시리얼 통신: 정상 (오류율 {error_rate:.1f}%)")
         else:
-            print(f"\n✅ 시리얼 통신: 완벽 (오류 없음)")
+            print(f"\n시리얼 통신: 완벽 (오류 없음)")
         
         if len(metric1_times)>0:
             arr=np.array(metric1_times)
-            print(f"\n📊 [지표1] 재인식 시간 (샘플: {len(arr)}개)")
+            print(f"\n[지표1] 재인식 시간 (샘플: {len(arr)}개)")
             print(f"  평균: {arr.mean():.3f}s")
             print(f"  중앙값: {np.median(arr):.3f}s")
             print(f"  최소: {arr.min():.3f}s")
             print(f"  최대: {arr.max():.3f}s")
         else:
-            print(f"\n📊 [지표1] 재인식 시간: 샘플 없음")
+            print(f"\n[지표1] 재인식 시간: 샘플 없음")
 
         if len(metric1_speeds_px)>0:
             ap=np.array(metric1_speeds_px)
             ac=np.array(metric1_speeds_cm)
-            print(f"\n📊 [지표1-속도] 추적 속도 (샘플: {len(ap)}개)")
+            print(f"\n[지표1-속도] 추적 속도 (샘플: {len(ap)}개)")
             print(f"  px/s - 평균: {ap.mean():.1f} | 중앙값: {np.median(ap):.1f} | 최대: {ap.max():.1f}")
             print(f"  cm/s - 평균: {ac.mean():.1f} | 중앙값: {np.median(ac):.1f} | 최대: {ac.max():.1f}")
         else:
-            print(f"\n📊 [지표1-속도] 샘플 없음")
+            print(f"\n[지표1-속도] 샘플 없음")
 
         if len(metric2_ratios)>0:
             arr=np.array(metric2_ratios)
-            print(f"\n📊 [지표2] 추적 안정성 (샘플: {len(arr)}개)")
+            print(f"\n[지표2] 추적 안정성 (샘플: {len(arr)}개)")
             print(f"  평균: {arr.mean():.1f}%")
             print(f"  중앙값: {np.median(arr):.1f}%")
             print(f"  최소: {arr.min():.1f}%")
             print(f"  최대: {arr.max():.1f}%")
         else:
-            print(f"\n📊 [지표2] 추적 안정성: 샘플 없음")
+            print(f"\n[지표2] 추적 안정성: 샘플 없음")
 
         if len(metric3_ratios)>0:
             arr=np.array(metric3_ratios)
-            print(f"\n📊 [지표3] ICR3 원내 비율 (샘플: {len(arr)}개)")
+            print(f"\n[지표3] ICR3 원내 비율 (샘플: {len(arr)}개)")
             print(f"  평균: {arr.mean():.1f}%")
             print(f"  중앙값: {np.median(arr):.1f}%")
             print(f"  최소: {arr.min():.1f}%")
             print(f"  최대: {arr.max():.1f}%")
         else:
-            print(f"\n📊 [지표3] ICR3: 샘플 없음")
+            print(f"\n[지표3] ICR3: 샘플 없음")
         
         print("=" * 70)
-        print("✅ 프로그램 종료 완료")
+        print("프로그램 종료 완료")
         print("=" * 70)
 
 if __name__ == "__main__":
     print("\n" + "=" * 70)
-    print("🚀 프로그램 초기화")
+    print("프로그램 초기화")
     print("=" * 70)
     print(f"Python 버전: {sys.version.split()[0]}")
     print(f"OpenCV 버전: {cv2.__version__}")
@@ -1853,7 +1853,7 @@ if __name__ == "__main__":
     print(f"시리얼 포트: {SERIAL_PORT} @ {SERIAL_BAUD}bps")
     print("=" * 70)
     
-    # ⭐ 시리얼 포트 존재 여부 확인
+    # 시리얼 포트 존재 여부 확인
     import serial.tools.list_ports
     ports = list(serial.tools.list_ports.comports())
     
@@ -1861,16 +1861,16 @@ if __name__ == "__main__":
         print("\n사용 가능한 포트:")
         port_found = False
         for p in ports:
-            marker = "✅" if p.device == SERIAL_PORT else "  "
+            marker = "->" if p.device == SERIAL_PORT else "  "
             print(f"  {marker} {p.device}: {p.description}")
             if p.device == SERIAL_PORT:
                 port_found = True
         
         if not port_found:
-            print(f"\n⚠️  경고: 설정된 포트 '{SERIAL_PORT}'를 찾을 수 없습니다!")
+            print(f"\n경고: 설정된 포트 '{SERIAL_PORT}'를 찾을 수 없습니다!")
             print(f"   위 목록에서 올바른 포트를 선택하여 코드를 수정하세요.")
     else:
-        print("\n❌ 사용 가능한 시리얼 포트가 없습니다!")
+        print("\n사용 가능한 시리얼 포트가 없습니다!")
         print("   아두이노가 연결되어 있는지 확인하세요.")
     
     print("=" * 70)
@@ -1880,7 +1880,7 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         print("\n" + "=" * 70)
-        print("❌ 치명적 오류 발생!")
+        print("치명적 오류 발생!")
         print("=" * 70)
         print(f"오류 타입: {type(e).__name__}")
         print(f"오류 메시지: {e}")
